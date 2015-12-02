@@ -45,4 +45,15 @@ defmodule StalTest do
 
     assert expected == Stal.explain(expr)
   end
+
+  defmodule FakeRedis do
+    def execute(_c, _expr) do
+      {:ok, ["a","b"]}
+    end
+  end
+
+  test "alternate client" do
+    state = %Stal{module: StalTest.FakeRedis, function: :execute}
+    assert ["a", "b"] == Stal.solve(:r, [], state) |> elem(1) |> Enum.sort
+  end
 end

@@ -1,7 +1,7 @@
 defmodule Stal do
 
   defstruct id: nil, item: [], ids: [], ops: [],
-            module: Redix, method: :command
+            module: Redix, function: :command
 
   defmodule InvalidCommand do
     defexception message: "invalid command"
@@ -53,14 +53,14 @@ defmodule Stal do
     %Stal{state | ops:  ops ++ [item], item: []}
   end
 
-  def solve(c, %Stal{ops: [op], module: mod, method: method}), do: apply(mod, method, [c, op])
-  def solve(c, %Stal{ids: ids, ops: ops, module: mod, method: method}) do
-    {:ok, "OK"} = apply(mod, method, [c, ["MULTI"]])
+  def solve(c, %Stal{ops: [op], module: mod, function: fun}), do: apply(mod, fun, [c, op])
+  def solve(c, %Stal{ids: ids, ops: ops, module: mod, function: fun}) do
+    {:ok, "OK"} = apply(mod, fun, [c, ["MULTI"]])
     Enum.each ops, fn(command) ->
-      {:ok, "QUEUED"} = apply(mod, method, [c, command])
+      {:ok, "QUEUED"} = apply(mod, fun, [c, command])
     end
-    {:ok, "QUEUED"} = apply(mod, method, [c, ["DEL"] ++ ids])
-    {:ok, reply} = apply(mod, method, [c, ["EXEC"]])
+    {:ok, "QUEUED"} = apply(mod, fun, [c, ["DEL"] ++ ids])
+    {:ok, reply} = apply(mod, fun, [c, ["EXEC"]])
     [_,result|_] = Enum.reverse(reply)
     {:ok, result}
   end

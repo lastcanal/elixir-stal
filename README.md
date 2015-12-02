@@ -77,6 +77,17 @@ Stal.explain([:SINTER, [:SUNION, "foo", "bar"], "baz"])
 
 All commands are pipelined and wrapped in a `MULTI/EXEC` transaction.
 
+If you want to use another redis client with Stal you can supply a
+module and function that will be called instead of `Redix.command`.
+
+```elixir
+expr = [:SCARD, [:SINTER, "foo", "bar"]]
+
+Stal.solve(redis, expr, %Stal{module: :eredis, function: :q})
+#=> {:ok, 2}
+```
+
+
 Installation
 ------------
 
